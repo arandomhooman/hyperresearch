@@ -167,10 +167,10 @@ Read both before starting. The vault_tag is in the scaffold's "Run config" secti
 
 ## Next step
 
-Return to the entry skill (`hyperresearch`). Read `research/prompt-decomposition.json` to learn the tier, then invoke step 2:
+Return to the entry skill (`hyperresearch`). Read `research/prompt-decomposition.json` to learn the tier, then invoke step 1b (plan review):
 
 ```
-Skill(skill: "hyperresearch-2-width-sweep")
+Skill(skill: "hyperresearch-1b-plan-review")
 ```
 
-Step 2 runs for ALL tiers.
+Step 1b surfaces the decomposition to the user via AskUserQuestion before any fetching happens — catches misclassified queries and wrong-direction decompositions cheaply. Step 1b chains to step 2 once the user confirms (or terminates if the user cancels).

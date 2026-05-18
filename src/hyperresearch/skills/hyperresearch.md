@@ -39,6 +39,7 @@ When you invoke a Skill, that skill's full procedure is loaded into your context
 | # | Skill name | What it does | Tiers |
 |---|---|---|---|
 | 1 | `hyperresearch-1-decompose` | Canonical query → scaffold + decomposition + coverage matrix + tier classification | all |
+| **1b** | **`hyperresearch-1b-plan-review`** | **(CUSTOM) AskUserQuestion gate — surfaces decomposition + tier + cost/time to the user before step 2 burns the breadth sweep. User can proceed / adjust / cancel.** | **all** |
 | 2 | `hyperresearch-2-width-sweep` | Multi-perspective search plan + parallel fetcher waves | all |
 | 3 | `hyperresearch-3-contradiction-graph` | Pair contradictions across the corpus into ranked fight clusters | full |
 | 4 | `hyperresearch-4-loci-analysis` | 2 loci-analysts (Opus) → scored loci.json with source budgets | full |
@@ -71,8 +72,8 @@ Step 1 classifies the query into a `pipeline_tier` (`light` / `full`). The tier 
 
 | Tier | Steps that run | Typical cost | Typical time |
 |------|---|---|---|
-| `light` | 1 → 2 → 10 (single draft) → 15 → 16 | ~$5–15 | ~30–40 min |
-| `full` | 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → **9b** → 10 → 11 → **11b** → 12(r1) → 13(r1) → 14(r1) → 12(r2) → 13(r2) → 14(r2) → 15 → 16 | ~$200–400 (customized) | ~3–5 hours (customized) |
+| `light` | 1 → **1b** → 2 → 10 (single draft) → 15 → 16 | ~$5–15 | ~30–40 min |
+| `full` | 1 → **1b** → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → **9b** → 10 → 11 → **11b** → 12(r1) → 13(r1) → 14(r1) → 12(r2) → 13(r2) → 14(r2) → 15 → 16 | ~$200–400 (customized) | ~3–5 hours (customized) |
 
 **Cost note:** the customized full pipeline runs ~2-3× the stock cost due to Sonnet→Opus upgrades on four roles, two new critic agents, the verdict-synthesizer team member, the quote-verify and recency-probe passes, and the two-round critic/patch loop. Time scales similarly.
 

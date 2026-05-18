@@ -3434,6 +3434,7 @@ def _install_hyperresearch_skill(vault_root: Path) -> str | None:
 
 _HYPERRESEARCH_STEP_SKILLS = [
     "hyperresearch-1-decompose",
+    "hyperresearch-1b-plan-review",
     "hyperresearch-2-width-sweep",
     "hyperresearch-3-contradiction-graph",
     "hyperresearch-4-loci-analysis",
