@@ -26,6 +26,9 @@ Read these inputs:
 - All `research/critic-findings-<name><round-suffix>.json` files for the current round (6 critic types: dialectic, depth, width, instruction, steelman, source-skeptic)
 - `research/critic-verdict<round-suffix>.json` — prioritized verdict from the verdict-synthesizer
 - `research/quote-audit.json` — quote verifier output from step 11b
+- `research/quantitative-audit.json` — numeric-claim audit from step 11b
+- `research/counterfactual-map.json` — weak-point map from step 11b
+- `research/bibliography-audit.json` — citation-reality audit from step 11b
 - `research/temp/evidence-digest.md` — patcher's primary citation source
 - `research/query-<vault_tag>.md` — canonical research query
 
@@ -93,7 +96,11 @@ prompt: |
       research/critic-findings-source-skeptic<round-suffix>.json
     ]
   - verdict_path: research/critic-verdict<round-suffix>.json
-  - quote_audit_path: research/quote-audit.json
+  - integrity_audits:
+      quote_audit_path: research/quote-audit.json
+      quantitative_audit_path: research/quantitative-audit.json
+      counterfactual_map_path: research/counterfactual-map.json
+      bibliography_audit_path: research/bibliography-audit.json
   - patch_log_path: research/patch-log<round-suffix>.json   (already stubbed)
   - evidence_digest_path: research/temp/evidence-digest.md
   - round: <1 or 2>
@@ -104,10 +111,20 @@ prompt: |
   verdict synthesizer has already clustered duplicates, resolved
   contradictions, and ranked by severity. Trust it.
 
-  CRITICAL: read research/quote-audit.json. Any `fabricated` or
-  `paraphrased_in_quotes` entries MUST be patched before any
-  critic-finding patch is applied. Fabricated quotes are the
-  highest-priority defect.
+  CRITICAL: the four 11b integrity audits identify objective defects
+  (fabricated text, wrong numbers, hallucinated citations, fragile
+  thesis joints). Any `critical` finding from these MUST be patched
+  before applying critic-finding patches. Order within criticals:
+  1. quantitative-audit fabricated/unit_error (wrong numbers ship as
+     misinformation)
+  2. bibliography-audit fabricated_vault_note/fabricated_url/misused_citation
+     (hallucinated sources destroy trust)
+  3. quote-audit fabricated/paraphrased_in_quotes (lying quote marks)
+  4. critic-verdict critical findings (interpretive defects)
+
+  CRITICAL: final report extension is `.md`. Do NOT rename, do NOT
+  convert to another format. The patcher operates by Edit on the
+  existing markdown file.
 ```
 
 The patcher's job:

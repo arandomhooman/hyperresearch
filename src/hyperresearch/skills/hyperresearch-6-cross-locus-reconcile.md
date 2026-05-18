@@ -75,8 +75,10 @@ You need the `## Committed position` section from every interim note in your con
 
 ## Next step
 
-Return to the entry skill (`hyperresearch`). Invoke step 7:
+Return to the entry skill (`hyperresearch`). Invoke step 6b (mid-pipeline checkpoint):
 
 ```
-Skill(skill: "hyperresearch-7-source-tensions")
+Skill(skill: "hyperresearch-6b-checkpoint")
 ```
+
+Step 6b surfaces the surviving loci, the committed positions, and the cross-locus tensions to the user via AskUserQuestion before drafting begins. It chains to step 7 once the user confirms (or terminates if cancelled).

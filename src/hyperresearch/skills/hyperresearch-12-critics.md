@@ -30,8 +30,13 @@ Read these inputs:
 - `research/prompt-decomposition.json` — pipeline_tier, atomic items
 - `research/notes/final_report_<vault_tag>.md` — synthesized draft from step 11
 - `research/query-<vault_tag>.md` — canonical research query
-- `research/quote-audit.json` — quote verifier output from step 11b (MUST exist; if missing, run step 11b first)
+- `research/quote-audit.json` — quote verifier output from step 11b (MUST exist)
+- `research/quantitative-audit.json` — numeric-claim auditor output from step 11b (MUST exist)
+- `research/counterfactual-map.json` — weak-point map from step 11b (MUST exist)
+- `research/bibliography-audit.json` — citation-reality audit from step 11b (MUST exist)
 - `research/round` — current round number (1 or 2; if file doesn't exist, this is round 1)
+
+If any of the four 11b audit files is missing, halt and re-invoke step 11b first.
 
 ---
 
@@ -143,12 +148,25 @@ Agent({
         research/critic-findings-steelman<round-suffix>.json,
         research/critic-findings-source-skeptic<round-suffix>.json
       ]
-    - quote_audit_path: research/quote-audit.json
+    - integrity_audits: [
+        research/quote-audit.json,
+        research/quantitative-audit.json,
+        research/counterfactual-map.json,
+        research/bibliography-audit.json
+      ]
     - team_name: critics-<vault_tag><round-suffix>
     - output_path: research/critic-verdict<round-suffix>.json
 
     Use SendMessage to interview critics where their findings contradict.
     Resolve or escalate. Mark task completed when verdict JSON is written.
+
+    Priority ordering for the verdict: critical findings from
+    quantitative-audit (unit errors, fabricated numbers), quote-audit
+    (fabricated quotes), and bibliography-audit (fabricated citations)
+    ALWAYS rank above critic findings — these are objective integrity
+    defects, not interpretive judgments. The counterfactual-map informs
+    how to weight critic findings (findings at named weak points are
+    more important than findings elsewhere).
 })
 ```
 

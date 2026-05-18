@@ -45,13 +45,14 @@ When you invoke a Skill, that skill's full procedure is loaded into your context
 | 4 | `hyperresearch-4-loci-analysis` | 2 loci-analysts (Opus) → scored loci.json with source budgets | full |
 | 5 | `hyperresearch-5-depth-investigation` | K depth-investigators (Opus) in parallel → interim notes with committed positions | full |
 | 6 | `hyperresearch-6-cross-locus-reconcile` | Reconcile committed positions → comparisons.md | full |
+| **6b** | **`hyperresearch-6b-checkpoint`** | **(CUSTOM) Mid-pipeline AskUserQuestion gate. Surfaces surviving loci, committed positions, and cross-locus tensions. User can proceed / adjust / cancel before drafting starts.** | **full** |
 | 7 | `hyperresearch-7-source-tensions` | Extract expert disagreements → source-tensions.json | full |
 | 8 | `hyperresearch-8-corpus-critic` | "What source would overturn this?" (Opus) + targeted gap-fill fetch | full |
 | 9 | `hyperresearch-9-evidence-digest` | Top claims + verbatim quotes → evidence-digest.md | full |
 | **9b** | **`hyperresearch-9b-recency-probe`** | **(CUSTOM) 90-day recency check against committed positions → recency-flags.md** | **full** |
 | 10 | `hyperresearch-10-triple-draft` | Per-angle source curation + 3 parallel draft-orchestrators (3 angle-specific drafts) | all |
 | 11 | `hyperresearch-11-synthesize` | Synthesis plan + outline + spawn synthesizer subagent (two-pass write) → final_report.md | full |
-| **11b** | **`hyperresearch-11b-quote-verify`** | **(CUSTOM) verify every quote in the final report against evidence-digest → quote-audit.json** | **full** |
+| **11b** | **`hyperresearch-11b-quote-verify`** | **(CUSTOM — expanded) 4 parallel pre-critic integrity agents: quote-verifier (text), quantitative-auditor (numbers), counterfactual-probe (weak-point map), bibliography-checker (citation reality). Outputs 4 JSONs the critics + patcher consume.** | **full** |
 | 12 | `hyperresearch-12-critics` | (CUSTOMIZED) TeamCreate-based debating critic team — 6 critics + verdict-synthesizer → findings JSONs + verdict.json. **Runs twice** (round 1 on synthesized draft, round 2 on patched draft). | full |
 | 13 | `hyperresearch-13-gap-fetch` | Fetch sources for critic-identified vault gaps (round-aware) | full |
 | 14 | `hyperresearch-14-patcher` | Surgical Edit hunks applied to draft, then route to step 12 (round 2) or step 15 (after round 2) | full |
@@ -73,7 +74,7 @@ Step 1 classifies the query into a `pipeline_tier` (`light` / `full`). The tier 
 | Tier | Steps that run | Typical cost | Typical time |
 |------|---|---|---|
 | `light` | 1 → **1b** → 2 → 10 (single draft) → 15 → 16 | ~$5–15 | ~30–40 min |
-| `full` | 1 → **1b** → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → **9b** → 10 → 11 → **11b** → 12(r1) → 13(r1) → 14(r1) → 12(r2) → 13(r2) → 14(r2) → 15 → 16 | ~$200–400 (customized) | ~3–5 hours (customized) |
+| `full` | 1 → **1b** → 2 → 3 → 4 → 5 → 6 → **6b** → 7 → 8 → 9 → **9b** → 10 → 11 → **11b** (4 parallel) → 12(r1) → 13(r1) → 14(r1) → 12(r2) → 13(r2) → 14(r2) → 15 → 16 | ~$250–500 (customized) | ~3.5–5.5 hours (customized) |
 
 **Cost note:** the customized full pipeline runs ~2-3× the stock cost due to Sonnet→Opus upgrades on four roles, two new critic agents, the verdict-synthesizer team member, the quote-verify and recency-probe passes, and the two-round critic/patch loop. Time scales similarly.
 
@@ -183,7 +184,7 @@ Context compaction may eat parts of this conversation. If you're unsure what ste
    - Step 9b: `research/recency-flags.md`
    - Step 10: `research/temp/draft-{a,b,c}.md` (or `research/notes/final_report_<vault_tag>.md` for light tier single-pass)
    - Step 11: `research/temp/synthesis-plan.md`, `research/temp/synthesis-outline.md`, `research/temp/synthesis-pass1.md`, `research/notes/final_report_<vault_tag>.md`
-   - Step 11b: `research/quote-audit.json`
+   - Step 11b (4 parallel audits): `research/quote-audit.json`, `research/quantitative-audit.json`, `research/counterfactual-map.json`, `research/bibliography-audit.json`
    - Step 12 (round-aware): `research/critic-findings-{dialectic,depth,width,instruction,steelman,source-skeptic}<round-suffix>.json`, `research/critic-verdict<round-suffix>.json` (round-suffix is empty for round 1, `-round2` for round 2). Also `research/round` (file containing `1` or `2`).
    - Step 13: `research/temp/post-critic-fetch-log<round-suffix>.md`
    - Step 14: `research/patch-log<round-suffix>.json` (and edited final_report.md)
@@ -228,8 +229,16 @@ done
 # Other expected artifacts
 for f in research/recency-flags.md \
          research/quote-audit.json \
+         research/quantitative-audit.json \
+         research/counterfactual-map.json \
+         research/bibliography-audit.json \
          research/polish-log.json; do
   test -f "$f" || echo "MISSING: $f"
+done
+
+# Final report invariant: MUST be a markdown file
+for f in research/notes/final_report_*.md; do
+  test -f "$f" || echo "MISSING: final report (.md required)"
 done
 ```
 
@@ -251,6 +260,7 @@ If any rule returns `error` severity issues, address them before declaring compl
 
 1. **PATCHING not REGENERATION after step 11.** Once step 11 produces the final report (or step 10 for light tier), modifications are surgical Edit hunks only.
 2. **One final report.** Step 11's synthesizer writes the final report ONCE. No re-synthesizing. (Light tier: step 10 writes it once.)
+2a. **Final report is a markdown file.** Always at `research/notes/final_report_<vault_tag>.md`. Never any other extension. Downstream tooling (patcher, polish-auditor, lint rules) all assume `.md`. If at any step you discover the final report has been written with a different extension or format, HALT the pipeline and surface the error rather than continuing.
 3. **At least one dialectical locus.** Step 4 must surface ≥1 dialectical locus unless skip is justified.
 4. **Every interim note commits to a position.** Step 5 investigators end with `## Committed position`.
 5. **`research/comparisons.md` exists when loci count ≥ 1.** Step 6 is mandatory whenever step 4 produced any loci.
