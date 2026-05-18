@@ -21,7 +21,8 @@ description: >
 
 Read these inputs:
 - `research/scaffold.md` — vault_tag
-- All `research/critic-findings-*.json` files (which exist depends on tier)
+- `research/round` — current round (1 or 2; default 1 if missing). Use this to compute the round suffix: empty for round 1, `-round2` for round 2.
+- All `research/critic-findings-<name><round-suffix>.json` files for the current round. The six finding files are: `dialectic`, `depth`, `width`, `instruction`, `steelman`, `source-skeptic`. Also read `research/critic-verdict<round-suffix>.json` and `research/quote-audit.json` for context — the verdict's `priority_queue` highlights which findings most need vault evidence.
 
 ---
 
@@ -38,7 +39,7 @@ Read these inputs:
    ```
    If 2+ relevant notes exist, the patcher can handle it — move on. If 0-1 relevant notes exist, this is a **fetch-worthy gap**.
 
-3. **Collect fetch-worthy gaps.** Cap at **5 gaps maximum** — this is a surgical fill, not a second width sweep. Prioritize by severity (critical first) then by how many critic findings the gap would resolve.
+3. **Collect fetch-worthy gaps.** For round 1, cap at **5 gaps maximum**. For round 2, cap at **3 gaps maximum** — round 1 should have filled most coverage gaps, so round 2 gap-fetch is conservative. Prioritize by severity (critical first) then by how many critic findings the gap would resolve. Use the verdict's `priority_queue` ranking when available — the top-ranked findings drive gap-fetch priority.
 
    If 0 fetch-worthy gaps: log "no gaps to fill" and proceed directly to step 14.
 
@@ -68,7 +69,7 @@ Read these inputs:
 
 5. **Update evidence digest.** If new claims were extracted, append them to `research/temp/evidence-digest.md` under a new `### Post-critic gap fill` section. The patcher reads the evidence digest when looking for citation sources to insert.
 
-6. **Log results** to `research/temp/post-critic-fetch-log.md`:
+6. **Log results** to `research/temp/post-critic-fetch-log<round-suffix>.md`:
    - Each gap: what was searched, how many new sources found, note IDs
    - If a gap remained unfilled after fetching: flag it so the patcher knows to acknowledge the limitation rather than fabricate
 
@@ -76,7 +77,7 @@ Read these inputs:
 
 ## Exit criterion
 
-- `research/temp/post-critic-fetch-log.md` exists (even if it says "no gaps found")
+- `research/temp/post-critic-fetch-log<round-suffix>.md` exists (even if it says "no gaps found")
 - All fetch-worthy gaps attempted (proceed to step 14 whether or not all gaps were filled — unfilled gaps are noted in the log)
 
 **Cost:** +$1-3 per run (2-4 Sonnet fetchers). Most runs with good step 2 coverage will find 0-2 gaps, making this a near-no-op.

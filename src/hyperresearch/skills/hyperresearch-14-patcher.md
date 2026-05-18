@@ -21,8 +21,11 @@ description: >
 
 Read these inputs:
 - `research/scaffold.md` — vault_tag
-- `research/notes/final_report_<vault_tag>.md` — the synthesized final report from step 11
-- All `research/critic-findings-*.json` files (count depends on tier)
+- `research/round` — current round (1 or 2; default 1 if missing). Compute `<round-suffix>`: empty for round 1, `-round2` for round 2.
+- `research/notes/final_report_<vault_tag>.md` — the synthesized final report from step 11 (round 1) OR the round-1-patched draft (round 2)
+- All `research/critic-findings-<name><round-suffix>.json` files for the current round (6 critic types: dialectic, depth, width, instruction, steelman, source-skeptic)
+- `research/critic-verdict<round-suffix>.json` — prioritized verdict from the verdict-synthesizer
+- `research/quote-audit.json` — quote verifier output from step 11b
 - `research/temp/evidence-digest.md` — patcher's primary citation source
 - `research/query-<vault_tag>.md` — canonical research query
 
@@ -49,10 +52,10 @@ Then proceed to step 15. Most runs should not use this gate.
 
 ## Step 14.1 — Pre-create the patch log stub
 
-The patcher is tool-locked to `[Read, Edit]` — it cannot Write. Edit can only modify files that already exist. So you (the orchestrator) MUST write the canonical stub first, which the patcher will then Edit to populate:
+The patcher is tool-locked to `[Read, Edit]` — it cannot Write. Edit can only modify files that already exist. So you (the orchestrator) MUST write the canonical stub first, which the patcher will then Edit to populate. Round-suffix the log so round 2 doesn't overwrite round 1:
 
 ```bash
-echo '{"total_findings": 0, "applied": [], "skipped": [], "conflicts": [], "orchestrator_escalated": []}' > research/patch-log.json
+echo '{"total_findings": 0, "applied": [], "skipped": [], "conflicts": [], "orchestrator_escalated": []}' > research/patch-log<round-suffix>.json
 ```
 
 The schema above is canonical. The patcher's only job on this file is to Edit the existing keys — `total_findings` becomes an integer, the four arrays get populated. **The patcher MUST NOT invent alternate schemas** — downstream tooling assumes the canonical shape.
@@ -82,13 +85,29 @@ prompt: |
   YOUR INPUTS:
   - draft_path: research/notes/final_report_<vault_tag>.md
   - findings_paths: [
-      research/critic-findings-dialectic.json,    (full tier only)
-      research/critic-findings-depth.json,        (full tier only)
-      research/critic-findings-width.json,
-      research/critic-findings-instruction.json
+      research/critic-findings-dialectic<round-suffix>.json,
+      research/critic-findings-depth<round-suffix>.json,
+      research/critic-findings-width<round-suffix>.json,
+      research/critic-findings-instruction<round-suffix>.json,
+      research/critic-findings-steelman<round-suffix>.json,
+      research/critic-findings-source-skeptic<round-suffix>.json
     ]
-  - patch_log_path: research/patch-log.json   (already stubbed)
+  - verdict_path: research/critic-verdict<round-suffix>.json
+  - quote_audit_path: research/quote-audit.json
+  - patch_log_path: research/patch-log<round-suffix>.json   (already stubbed)
   - evidence_digest_path: research/temp/evidence-digest.md
+  - round: <1 or 2>
+
+  CRITICAL: read research/critic-verdict<round-suffix>.json FIRST. Its
+  `priority_queue` is the canonical ordering — apply findings in that
+  order, not the order they appear in the individual finding files. The
+  verdict synthesizer has already clustered duplicates, resolved
+  contradictions, and ranked by severity. Trust it.
+
+  CRITICAL: read research/quote-audit.json. Any `fabricated` or
+  `paraphrased_in_quotes` entries MUST be patched before any
+  critic-finding patch is applied. Fabricated quotes are the
+  highest-priority defect.
 ```
 
 The patcher's job:
@@ -102,18 +121,18 @@ The patcher's job:
 
 ## Step 14.3 — Read the patch log
 
-Check the patch log when the patcher returns:
+Check the patch log when the patcher returns (round-suffix-aware):
 
-- **Did the patcher apply all `critical` findings?** If any critical was SKIPPED, that's a pipeline blocker — resolve it yourself before step 15. Options:
+- **Did the patcher apply all `critical` findings?** If any critical was SKIPPED, that's a pipeline blocker — resolve it yourself before step 15 (or before round 2). Options:
   - (a) reject the finding as invalid after re-reading the draft
   - (b) escalate to the user
   - (c) hand-craft an Edit to address it (you have Write/Edit access; the lock applies only to the patcher subagent)
 
-- **Did any findings CONFLICT?** Look at the conflict log. If two critics disagreed and the patcher picked one, consider whether the discarded one was actually more important.
+- **Did any findings CONFLICT?** Look at the conflict log. If two critics disagreed and the patcher picked one, consider whether the discarded one was actually more important. Note that the verdict-synthesizer should have pre-resolved most contradictions; any remaining conflict in the patch log likely indicates the verdict-synthesizer escalated rather than resolved.
 
 - **Did the patcher log a "patch too large" skip?** That means a critic proposed regeneration in patch clothing. If the finding was critical, re-spawn the critic with a tighter suggestion, or address it yourself with multiple small hunks.
 
-- **Is the patch log still the empty stub?** If yes, the patcher failed to log — its Task result will contain the real log inline. Read the Task result, parse out the JSON, and write it to `research/patch-log.json` yourself via Bash so downstream lint rules see it.
+- **Is the patch log still the empty stub?** If yes, the patcher failed to log — its Task result will contain the real log inline. Read the Task result, parse out the JSON, and write it to `research/patch-log<round-suffix>.json` yourself via Bash so downstream lint rules see it.
 
 ---
 
@@ -140,17 +159,42 @@ For each entry:
 
 ## Exit criterion
 
-- `research/patch-log.json` exists with `total_findings` set and at least one of `applied` / `skipped` / `conflicts` populated
+- `research/patch-log<round-suffix>.json` exists with `total_findings` set and at least one of `applied` / `skipped` / `conflicts` populated
 - All critical findings either applied or resolved by orchestrator
-- All `orchestrator_escalated` findings handled (with `research/orchestrator-restructure-log.md` if any structural restructures were applied)
+- All `orchestrator_escalated` findings handled (with `research/orchestrator-restructure-log<round-suffix>.md` if any structural restructures were applied)
 - `research/notes/final_report_<vault_tag>.md` has been edited (or no edits needed if findings were trivial)
+
+---
+
+## Step 14.5 — Round routing
+
+Read the round counter at `research/round` (default: `1`).
+
+**If round == 1:**
+
+1. Write `2` to `research/round` (overwrites the `1`).
+2. Log a brief round-1 summary to `research/temp/round1-summary.md` — what the major patches changed, what's expected to differ in the round-2 critique.
+3. Return to the entry skill and invoke step 12 (round 2):
+
+   ```
+   Skill(skill: "hyperresearch-12-critics")
+   ```
+
+   Step 12 will detect `research/round == 2`, suffix its output filenames with `-round2`, and run the full debating-critic team on the round-1-patched draft. Steps 13 and 14 follow, also round-2-suffixed. After round 2's patch completes, this step routes to step 15.
+
+**If round == 2:**
+
+1. Confirm round 2 patches are clean.
+2. Log a final two-round summary to `research/temp/two-round-summary.md` — concise diff of what round 1 caught vs. what round 2 caught (the second-round catches are typically defects introduced by round-1 patches, or weaknesses the original draft was too rough to expose).
+3. Reset the round counter for next pipeline run: write `1` to `research/round` (or delete it).
+4. Return to the entry skill and invoke step 15:
+
+   ```
+   Skill(skill: "hyperresearch-15-polish")
+   ```
 
 ---
 
 ## Next step
 
-Return to the entry skill (`hyperresearch`). Invoke step 15:
-
-```
-Skill(skill: "hyperresearch-15-polish")
-```
+See Step 14.5 above. The next-step routing depends on the current round.

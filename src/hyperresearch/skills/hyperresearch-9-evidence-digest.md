@@ -74,10 +74,10 @@ If fewer claims exist in total, include all of them.
 
 ## Next step
 
-Return to the entry skill (`hyperresearch`). Invoke step 10:
+Return to the entry skill (`hyperresearch`). Invoke step 9b (recency probe):
 
 ```
-Skill(skill: "hyperresearch-10-triple-draft")
+Skill(skill: "hyperresearch-9b-recency-probe")
 ```
 
-Step 10 is the most important step in the pipeline. Re-read the entry skill before invoking if needed — the triple-draft ensemble must spawn 3 draft-orchestrators for `full` tier.
+Step 9b runs a 90-day recency check against the committed positions before drafting begins. It chains to step 10 (triple draft). Step 10 is the most important step in the pipeline — its draft orchestrators must include `research/recency-flags.md` (produced by 9b) in their inputs.

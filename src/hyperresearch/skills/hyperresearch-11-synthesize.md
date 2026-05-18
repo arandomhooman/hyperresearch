@@ -247,8 +247,10 @@ After this step, the final report is only modified by Edit hunks from the patche
 
 ## Next step
 
-Return to the entry skill (`hyperresearch`). Invoke step 12:
+Return to the entry skill (`hyperresearch`). Invoke step 11b (quote verification):
 
 ```
-Skill(skill: "hyperresearch-12-critics")
+Skill(skill: "hyperresearch-11b-quote-verify")
 ```
+
+Step 11b runs the quote verifier, which catches fabricated and paraphrased-in-quote-marks quotes before step 12 (critics) sees the draft. Step 11b then chains to step 12.
