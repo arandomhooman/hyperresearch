@@ -45,7 +45,6 @@ When you invoke a Skill, that skill's full procedure is loaded into your context
 | 4 | `hyperresearch-4-loci-analysis` | 2 loci-analysts (Opus) → scored loci.json with source budgets | full |
 | 5 | `hyperresearch-5-depth-investigation` | K depth-investigators (Opus) in parallel → interim notes with committed positions | full |
 | 6 | `hyperresearch-6-cross-locus-reconcile` | Reconcile committed positions → comparisons.md | full |
-| **6b** | **`hyperresearch-6b-checkpoint`** | **(CUSTOM) Mid-pipeline AskUserQuestion gate. Surfaces surviving loci, committed positions, and cross-locus tensions. User can proceed / adjust / cancel before drafting starts.** | **full** |
 | 7 | `hyperresearch-7-source-tensions` | Extract expert disagreements → source-tensions.json | full |
 | 8 | `hyperresearch-8-corpus-critic` | "What source would overturn this?" (Opus) + targeted gap-fill fetch | full |
 | 9 | `hyperresearch-9-evidence-digest` | Top claims + verbatim quotes → evidence-digest.md | full |
@@ -74,7 +73,7 @@ Step 1 classifies the query into a `pipeline_tier` (`light` / `full`). The tier 
 | Tier | Steps that run | Typical cost | Typical time |
 |------|---|---|---|
 | `light` | 1 → **1b** → 2 → 10 (single draft) → 15 → 16 | ~$5–15 | ~30–40 min |
-| `full` | 1 → **1b** → 2 → 3 → 4 → 5 → 6 → **6b** → 7 → 8 → 9 → **9b** → 10 → 11 → **11b** (4 parallel) → 12(r1) → 13(r1) → 14(r1) → 12(r2) → 13(r2) → 14(r2) → 15 → 16 | ~$250–500 (customized) | ~3.5–5.5 hours (customized) |
+| `full` | 1 → **1b** → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → **9b** → 10 → 11 → **11b** (4 parallel) → 12(r1) → 13(r1) → 14(r1) → 12(r2) → 13(r2) → 14(r2) → 15 → 16 | ~$250–500 (customized) | ~3.5–5.5 hours (customized) |
 
 **Cost note:** the customized full pipeline runs ~2-3× the stock cost due to Sonnet→Opus upgrades on four roles, two new critic agents, the verdict-synthesizer team member, the quote-verify and recency-probe passes, and the two-round critic/patch loop. Time scales similarly.
 

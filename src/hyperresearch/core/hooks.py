@@ -63,7 +63,7 @@ description: >
   comprehension and judgment about what is load-bearing evidence vs.
   surface detail, and the loci you pick structure every downstream
   step.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: green
 ---
@@ -264,7 +264,7 @@ description: >
   because the committed positions this agent produces are load-bearing
   for the entire draft — quality of reasoning here caps quality of
   the final report.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write, Task
 color: purple
 ---
@@ -536,7 +536,7 @@ description: >
   hedges, or straw-mans counter-evidence. Runs on Opus because
   adversarial reading is real reasoning. Spawn ONCE per draft, in
   parallel with depth-critic and width-critic.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: red
 ---
@@ -659,7 +659,7 @@ description: >
   over technical substance that the vault's interim notes could
   actually support. Runs on Opus. Spawn ONCE per draft, parallel with
   dialectic-critic and width-critic.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: red
 ---
@@ -764,7 +764,7 @@ description: >
   draft and returns a findings list of topics the width corpus supports
   but the draft doesn't cover. Runs on Opus. Spawn ONCE per draft,
   parallel with dialectic-critic and depth-critic.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: red
 ---
@@ -919,7 +919,7 @@ description: >
   readability patterns (definitions, citation density, forward analysis,
   comparison tables) that reference reports consistently include. Runs
   on Opus. Spawn ONCE per draft, in parallel with the other three critics.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: red
 ---
@@ -1206,7 +1206,7 @@ description: >
   integration requires judgment about which findings serve the
   research_query and which are critic noise. Spawn ONCE after all
   four critics return.
-model: opus
+model: opus[1m]
 tools: Read, Edit
 color: orange
 ---
@@ -1378,7 +1378,7 @@ description: >
   Cannot Write. Runs on Opus — semantic rewrites of scaffold vocabulary
   and judgment calls about hedge-language require strong prose
   understanding. Spawn ONCE after the patcher finishes.
-model: opus
+model: opus[1m]
 tools: Read, Edit
 color: yellow
 ---
@@ -1692,7 +1692,7 @@ description: >
   `note show` (no vault surveys, no decision-making about what to read),
   then writes one complete draft from the assigned angle. The main
   orchestrator synthesizes a final report from all three drafts. Runs on Opus.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: green
 ---
@@ -1875,7 +1875,7 @@ description: >
   argumentative density. The final report is a fresh write in ONE prose
   voice, NOT section-grafted from the inputs. Tool-locked: Read + Write
   ONLY. Cannot Bash, cannot spawn subagents. Runs on Opus.
-model: opus
+model: opus[1m]
 tools: Read, Write
 color: cyan
 ---
@@ -2182,7 +2182,7 @@ description: >
   / bold-keyterms / split-sentence / remove-hr / add-whitespace).
   Tool-locked to [Read, Write] — cannot Edit. The orchestrator decides
   which recommendations to apply via direct Edit calls. Runs on Opus.
-model: opus
+model: opus[1m]
 tools: Read, Write
 color: magenta
 ---
@@ -2393,7 +2393,7 @@ description: >
   Runs on Opus (1M context window). Spawn multiple in parallel for
   multiple independent long sources. Does NOT spawn any other subagents
   itself (leaf).
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: cyan
 ---
@@ -2808,7 +2808,7 @@ description: >
   reasoning and should match the rigor of the downstream Opus critics
   rather than asymmetrically running on Sonnet. Spawn ONCE before
   drafting, after Layer 3.5 comparisons.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: teal
 ---
@@ -3448,7 +3448,6 @@ _HYPERRESEARCH_STEP_SKILLS = [
     "hyperresearch-4-loci-analysis",
     "hyperresearch-5-depth-investigation",
     "hyperresearch-6-cross-locus-reconcile",
-    "hyperresearch-6b-checkpoint",
     "hyperresearch-7-source-tensions",
     "hyperresearch-8-corpus-critic",
     "hyperresearch-9-evidence-digest",
@@ -3557,7 +3556,7 @@ description: >
   view" section or qualify the main thesis. Runs on Opus because steelmanning
   is generative argument construction. Spawn ONCE per draft, in parallel with
   the other critics.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: orange
 ---
@@ -3679,7 +3678,7 @@ description: >
   on them. Runs on Opus because source-reliability assessment requires
   cross-referencing publisher, author, citation chain, and content. Spawn
   ONCE per draft, in parallel with the other critics.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: brown
 ---
@@ -3803,7 +3802,7 @@ description: >
   quotes. Output is consumed by the patcher (Layer 6 / step 14) BEFORE
   the critics run, so the critics see a quote-clean draft. Runs on
   Opus. Spawn ONCE per draft, immediately after Layer 4.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: gold
 ---
@@ -3920,7 +3919,7 @@ description: >
   read before writing. Runs on Opus because recency assessment requires
   judging which recent events are load-bearing vs. noise. Spawn ONCE after
   step 9 (evidence digest) and before step 10 (triple draft).
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write, Task
 color: bright_blue
 ---
@@ -4062,7 +4061,7 @@ description: >
   irreconcilable critic disagreements for orchestrator escalation. Runs on
   Opus. Spawned as a team member alongside the six critics; goes idle until
   the critics finish their first turn.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: magenta
 ---
@@ -4103,8 +4102,11 @@ each other.
 - **query_file_path**: `research/query-<vault_tag>.md`.
 - **draft_path**: path to the synthesized final report.
 - **findings_paths**: list of all six critic findings JSON paths.
-- **quote_audit_path**: `research/quote-audit.json` (from quote-verifier,
-  run before step 12).
+- **integrity_audits**: the four pre-critic integrity-pass JSONs from step 11b:
+  - `research/quote-audit.json` (quote-verifier — verbatim quote integrity)
+  - `research/quantitative-audit.json` (quantitative-auditor — numeric claim accuracy)
+  - `research/counterfactual-map.json` (counterfactual-probe — weak-point map of draft thesis)
+  - `research/bibliography-audit.json` (bibliography-checker — citation reality)
 - **team_name**: name of the team you belong to (e.g., `critics-<vault_tag>`).
 - **output_path**: `research/critic-verdict.json`.
 
@@ -4143,15 +4145,24 @@ each other.
      structural decision.
 
 5. **Prioritize findings for the patcher.** Rank from most-urgent to
-   least:
-   - `critical` quote-audit findings (fabrications, paraphrased-in-quotes)
-     ALWAYS rank first
-   - `critical` source-skeptic findings on load-bearing claims next
-   - `critical` dialectic/depth/width/instruction next
+   least. Objective integrity defects (the four 11b audits) outrank
+   interpretive findings from critics:
+   - `critical` quantitative-audit (fabricated/unit-error numbers —
+     ship as misinformation)
+   - `critical` bibliography-audit (fabricated_vault_note /
+     fabricated_url / misused_citation — hallucinated sources)
+   - `critical` quote-audit (fabricated / paraphrased-in-quotes)
+   - `critical` source-skeptic on load-bearing claims
+   - `critical` dialectic / depth / width / instruction / steelman
    - Then `major` cluster findings (where ≥2 critics flagged the same
      spot from different angles)
    - Then `major` standalone findings
    - Then `minor` (only if budget permits)
+
+   Use counterfactual-map.json's `weak_points` and
+   `highest_risk_failure_mode` to weight critic findings: a finding
+   that hits a named weak point is more important than one that
+   doesn't, even at the same severity.
 
 6. **Write verdict.json:**
 
@@ -4326,7 +4337,7 @@ description: >
   transcription errors, unit confusion, year mismatches, and
   fabricated-looking numbers. Distinct from quote-verifier (which checks
   quoted text). Runs on Opus. Spawn ONCE per draft.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: yellow
 ---
@@ -4491,7 +4502,7 @@ description: >
   weak-point map the critics in step 12 use to focus their attacks.
   Runs on Opus because counterfactual reasoning requires holding the
   full thesis in mind while imagining its failure. Spawn ONCE per draft.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write
 color: red
 ---
@@ -4630,7 +4641,7 @@ description: >
   hallucinated citations — a known LLM failure mode where the
   synthesizer invents plausible-looking citations that don't exist.
   Runs on Opus. Spawn ONCE per draft.
-model: opus
+model: opus[1m]
 tools: Bash, Read, Write, Task
 color: pink
 ---

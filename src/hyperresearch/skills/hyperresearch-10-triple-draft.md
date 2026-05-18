@@ -27,6 +27,7 @@ Read these inputs:
 - `research/scaffold.md` — vault_tag, modality, wrapper requirements
 - `research/prompt-decomposition.json` — atomic items, required_section_headings, response_format, citation_style, pipeline_tier
 - `research/temp/evidence-digest.md` — top claims + verbatim quotes — PRIMARY EVIDENCE LAYER (full only; absent for light)
+- `research/recency-flags.md` (full tier; from step 9b) — last-90-day invalidations / updates against committed positions. Draft sub-orchestrators MUST read this and hedge/pivot claims that the recency probe flagged as invalidated.
 - `research/comparisons.md` (full tier) — cross-locus tensions
 - `research/temp/source-tensions.json` (full tier) — expert disagreements
 - `research/temp/coverage-gaps.md` (if exists) — items with weak source coverage
@@ -161,6 +162,7 @@ prompt: |
   - must_read_note_ids: [<paste the IDs from research/temp/draft-<x>-source-list.md, e.g. 30-50 IDs>]
   - decomposition_path: research/prompt-decomposition.json
   - evidence_digest_path: research/temp/evidence-digest.md
+  - recency_flags_path: research/recency-flags.md   (read this to learn which committed positions need hedging due to recent developments; reverse / qualify / pivot claims that the recency probe flagged invalidating)
   - comparisons_path: research/comparisons.md
   - source_tensions_path: research/temp/source-tensions.json
   - response_format: "<short|structured|argumentative>"
